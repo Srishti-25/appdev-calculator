@@ -1,0 +1,130 @@
+import 'package:flutter/material.dart';
+
+void main() => runApp(ToDoApp());
+
+class ToDoApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'To-Do List',
+      debugShowCheckedModeBanner: false,
+      home: ToDoHome(),
+    );
+  }
+}
+
+class ToDoHome extends StatefulWidget {
+  @override
+  _ToDoHomeState createState() => _ToDoHomeState();
+}
+
+class _ToDoHomeState extends State<ToDoHome> {
+  final List<String> _tasks = [];
+  final TextEditingController _controller = TextEditingController();
+
+  void _addTask() {
+    if (_controller.text.trim().isNotEmpty) {
+      setState(() {
+        _tasks.add(_controller.text.trim());
+        _controller.clear();
+      });
+    }
+  }
+
+  void _editTask(int index) {
+    _controller.text = _tasks[index];
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Edit Task'),
+        content: TextField(
+          controller: _controller,
+          autofocus: true,
+          decoration: InputDecoration(hintText: 'Update task'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _tasks[index] = _controller.text.trim();
+                _controller.clear();
+              });
+              Navigator.pop(context);
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteTask(int index) {
+    setState(() {
+      _tasks.removeAt(index);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('To-Do List'),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: 'Enter a task',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: _addTask,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                  ),
+                  child: Text('Add'),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _tasks.isEmpty
+                ? Center(child: Text('No tasks yet!'))
+                : ListView.builder(
+                    itemCount: _tasks.length,
+                    itemBuilder: (_, index) => Card(
+                      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: ListTile(
+                        title: Text(_tasks[index]),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () => _editTask(index),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteTask(index),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
